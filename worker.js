@@ -187,7 +187,9 @@ class Car {
             json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.push({ ident: car.getAttribute("id"), direct: this.direction, speed: this.speed, pos: { x: 0, y: null } })
 
         }
-
+        if(this.path[0] == "juncR"){
+            console.log(this.rd_ident)
+        }
         roadParent.appendChild(car)
         var carElement = this.car;
         this.car = {
@@ -395,7 +397,7 @@ class Car {
                     } else {
                         this.Start();
                     }
-                    console.log(Math.abs(parseInt(carElem.style.left.replace("px", ""))))
+                    // console.log(Math.abs(parseInt(carElem.style.left.replace("px", ""))))
                     if ((Math.abs(parseInt(carElem.style.left.replace("px", ""))) <= targetX && this.state.isMoving || ( (parseInt(carElem.style.left.replace("px", "")))) < 0 )) {
                         this.DestroyCar(false)
                         this.path.shift()
@@ -496,10 +498,14 @@ class Car {
             if (json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.length > 1 && json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident) > 0) {
                 // console.log(`Comparing car ${json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)]} with infront ${json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)-1]}`)
                 // console.log(Maths.abs((json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)-1].pos.x - json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)].pos.x)))
-                if (Math.abs((json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident) - 1].pos.x - json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)].pos.x)) <= 13) {
+                if (Math.abs((json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident) - 1].pos.x - json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)].pos.x)) <= 30) {
                     this.Stop();
                     action = true;
                 }else{
+                    if(Math.abs((json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident) - 1].pos.x - json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)].pos.x)) <= 40){
+                        this.speed = Math.floor(Math.random() * (5 - 3) + 3)
+                    }
+                    this.speed = 1.5;
                     this.Start();
                     action = false
                 }
@@ -508,7 +514,7 @@ class Car {
             if (json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.length > 1 && json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident) > 0) {
                 // console.log(`Comparing car ${json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)]} with infront ${json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)-1]}`)
                 // console.log(Maths.abs((json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)-1].pos.y - json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)].pos.y))
-                if (Math.abs((json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident) - 1].pos.y - json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)].pos.y)) <= 13) {
+                if (Math.abs((json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident) - 1].pos.y - json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)].pos.y)) <= 15) {
                     this.Stop();
                     action = true;
                 }else{
@@ -558,7 +564,7 @@ json.geo.map.Sector_XY01.junctions.forEach((jn) => {
 var maxSpawns = 0
 let roads = ["max_2", "max_1", "mini_2"]
 setInterval(() => {
-    if (maxSpawns > 100) return
+    if (maxSpawns > 1000000) return
     let car = new Car(roads[Math.floor(Math.random() * roads.length)])
     json.geo.map.Sector_XY01.rt.cars.push(car)
     maxSpawns++;
@@ -611,7 +617,6 @@ setInterval(() => {
 const ChangeStreetLight = (ident, to) => {
     try {
         if (to == 1) {
-            console.log(1)
             document.getElementById(ident + "_light").setAttribute('src', './green.png')
         } else if (to == 0) {
             document.getElementById(ident + "_light").setAttribute('src', './red.png')
@@ -621,3 +626,101 @@ const ChangeStreetLight = (ident, to) => {
 
     }
 } 
+
+
+// TRAFFIC AI
+let controllable_lanes = [
+    {
+        ident: "max_1",
+        number: 0,
+        inRegion: 0,
+        capacity: 50,
+        regionX_min: 256,
+        regionX_max: 415,
+        capRegion: 10,
+    },
+    {
+        ident: "max_2",
+        number: 0,
+        inRegion: 0,
+        capacity: 50,
+        regionX_min: 465,
+        regionX_max: 650,
+        capRegion: 10,
+    },
+    {
+        ident: "mini_2",
+        number: 0,
+        inRegion: 0,
+        capacity: 7,
+        regionY_min: -5,
+        regionY_max: 85,
+        capRegion: 4,
+    }
+]
+const ManageTraffic = () => {
+
+    // set max 1 to green and max 2 to red
+    ChangeStreetLight("max_1", 1)
+    ChangeStreetLight("max_2", 1)
+    ChangeStreetLight("mini_2", 1)
+
+    setInterval(() => {
+        controllable_lanes.forEach((lane) => {
+            let roadInfo = json.geo.map.Sector_XY01.roads.find(rd => rd.ident == lane.ident)
+            lane.number = roadInfo.queue.length;
+            let counter = 0;
+            roadInfo.queue.forEach((car) => {
+                if(car.pos.x != null){
+                    // max 1 or max 2
+                    if(car.direct == "left"){
+                        if(car.pos.x >= lane.regionX_min && car.pos.x <= lane.regionX_max){
+                            counter++;
+                        }
+                    }else if(car.direct == "right"){
+                        if(car.pos.x >= lane.regionX_min && car.pos.x <= lane.regionX_max){
+                            counter++;
+                        }
+                    }
+                }else if(car.pos.y != null) {
+                    if(car.pos.y <= lane.regionY_max && car.pos.y <= lane.regionY_max){
+                        counter++;
+                    }
+                }
+            })
+            lane.inRegion = counter;
+        })
+        // finding maximum blockage
+        var laneBlockage = 0;
+        var index = 0;
+        var laneBlockagePercent = controllable_lanes[0].inRegion/controllable_lanes[0].capRegion;
+        controllable_lanes.forEach((lane) => {
+            if(lane.inRegion/lane.capRegion > laneBlockagePercent){
+                laneBlockagePercent = lane.inRegion/lane.capRegion;
+                laneBlockage = index;
+            }
+            index++;
+        })
+
+        if(controllable_lanes[laneBlockage].ident == "max_1"){
+            ChangeStreetLight("mini_2", 0)
+            ChangeStreetLight("max_2", 0)
+            ChangeStreetLight("max_1", 1)
+
+        }else if(controllable_lanes[laneBlockage].ident == "max_2"){
+            ChangeStreetLight("mini_2", 0)
+            ChangeStreetLight("max_1", 0)
+            ChangeStreetLight("max_2", 1)
+        }else if(controllable_lanes[laneBlockage].ident == "mini_2"){
+            ChangeStreetLight("max_1", 0)
+            ChangeStreetLight("max_2", 0)
+            ChangeStreetLight("mini_2", 1)
+        }
+
+        controllable_lanes.forEach((lane) => {
+            
+        })
+    }, 5000)
+}
+
+ManageTraffic()
