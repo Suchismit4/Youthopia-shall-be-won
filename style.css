@@ -1,0 +1,82 @@
+#city {
+    width: 900px;
+    height: 560px;
+    background-image: url('./city2.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    background-size: cover;
+    z-index: 1 !important;
+    overflow: hidden;
+}
+
+.road {
+    z-index: 90 !important;
+    justify-content: center;
+}
+
+.road:hover {
+    cursor: pointer;
+    z-index: 90 !important;
+    animation: glow 3s infinite;
+
+}
+
+.junction {
+    z-index: 99 !important;
+
+}
+
+.junction:hover {
+    cursor: pointer;
+    z-index: 99 !important;
+    animation: junc_glow 3s infinite;
+
+}
+
+@keyframes glow {
+    0% {
+        background-color: #49e8192a;
+        box-shadow: 0 0 5px #2ba805;
+    }
+
+    50% {
+        background-color: #49e8192a;
+        box-shadow: 0 0 20px #49e819;
+    }
+
+    100% {
+        background-color: #49e8192a;
+        box-shadow: 0 0 5px #2ba805;
+    }
+}
+
+@keyframes junc_glow {
+    0% {
+        background-color: #e819192a;
+        box-shadow: 0 0 5px #a80505;
+    }
+
+    50% {
+        background-color: #e819192a;
+        box-shadow: 0 0 20px #e81919;
+    }
+
+    100% {
+        background-color: #e819192a;
+        box-shadow: 0 0 5px #a80505;
+    }
+}
+
+.carRight {
+    transition: .3s ease;
+
+}
+
+.carLeft {
+    transition: .3s ease;
+}
+
+.carUp {
+    transition: .3s ease;
+}
