@@ -395,8 +395,8 @@ class Car {
                     } else {
                         this.Start();
                     }
-
-                    if ((Math.abs(parseInt(carElem.style.left.replace("px", ""))) <= targetX || Math.abs(parseInt(carElem.style.left.replace("px", "")))) < 0 && this.state.isMoving) {
+                    console.log(Math.abs(parseInt(carElem.style.left.replace("px", ""))))
+                    if ((Math.abs(parseInt(carElem.style.left.replace("px", ""))) <= targetX && this.state.isMoving || ( (parseInt(carElem.style.left.replace("px", "")))) < 0 )) {
                         this.DestroyCar(false)
                         this.path.shift()
                         return clearInterval(this.lifeCycle)
@@ -497,7 +497,6 @@ class Car {
                 // console.log(`Comparing car ${json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)]} with infront ${json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)-1]}`)
                 // console.log(Maths.abs((json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)-1].pos.x - json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)].pos.x)))
                 if (Math.abs((json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident) - 1].pos.x - json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue[json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.ident)].pos.x)) <= 13) {
-                    console.log("hehe")
                     this.Stop();
                     action = true;
                 }else{
