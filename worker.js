@@ -1,5 +1,7 @@
 const city = document.getElementById("city");
-
+function insertAt(array, index, ...elementsArray) {
+    array.splice(index, 0, ...elementsArray);
+}
 const json = {
     name: "Kolkata",
     temperature: 27,
@@ -27,8 +29,8 @@ const json = {
                         ident: "max_1",
                         horizontal: true,
                         direction: "right",
-                        dest: ["ruby", "dps"]
-
+                        dest: ["ruby", "dps"],
+                        queue: []
                     },
                     {
                         xTop: 0,
@@ -38,7 +40,9 @@ const json = {
                         ident: "max_2",
                         direction: "left",
                         horizontal: true,
-                        dest: ["garia", "dps"]
+                        dest: ["garia", "dps"],
+                        carAtJn: null,
+                        queue: []
                     },
                     {
                         xTop: 444,
@@ -48,7 +52,8 @@ const json = {
                         ident: "mini_1",
                         dest: ["ruby", "dps"],
                         horizontal: false,
-                        direction: "up"
+                        direction: "up",
+                        queue: [],
                     },
                     {
                         xTop: 446,
@@ -58,11 +63,12 @@ const json = {
                         ident: "mini_2",
                         dest: ["dps", "garia"],
                         horizontal: false,
-                        direction: "up"
+                        direction: "up",
+                        queue: []
                     },
 
                 ],
-
+                
                 rt: {
                     carsLen: 0,
                     cars: []
@@ -88,7 +94,7 @@ class Car {
         }
         this.FindRoute(rd_ident)
         this.SpawnCar(null)
-        console.log(this.path)
+        // console.log(this.path)
     }
 
     SpawnCar(isGariaJn) {
@@ -100,10 +106,12 @@ class Car {
         json.geo.map.Sector_XY01.rt.carsLen++;
         car.setAttribute("src", './car.png')
         let roadParent = document.getElementById(this.rd_ident);
+        
         if (this.rd_ident.toString().includes("max")) {
             car.setAttribute("width", "25px")
             car.setAttribute("height", "25px")
         }
+
         if (this.rd_ident.toString().includes("min")) {
             car.setAttribute("width", "19px")
             car.setAttribute("height", "19px")
@@ -115,6 +123,7 @@ class Car {
             car.setAttribute("src", './car3.png')
             car.classList.add('carUp')
             this.direction = "up";
+            json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.push({ident: car.getAttribute("id"), direct: this.car.direction, pos: {x: null, y: 226.25}})
         }
 
         if (!roadInfo.horizontal && roadInfo.direction == "up" && roadInfo.ident == "mini_2") {
@@ -122,6 +131,8 @@ class Car {
             car.setAttribute("src", './car3.png')
             car.classList.add('carUp')
             this.direction = "up";
+            json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.push({ident: car.getAttribute("id"), direct: this.car.direction, pos: {x: null, y: 125}})
+            
         }
 
         if (roadInfo.horizontal && roadInfo.direction == "left") {
@@ -129,26 +140,36 @@ class Car {
             car.classList.add('carLeft')
             this.direction = "left";
             if(isGariaJn){
-                car.setAttribute("style", `position: absolute; left: ${444}px`)
+                car.setAttribute("style", `position: absolute; left: ${444}px`) 
+                car.setAttribute("id", `${car.getAttribute('id')}-mini`)
+                if(json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).carAtJn != null){
+                   insertAt(json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue, json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(a => a.ident === this.car.carAtJn), {ident: car.getAttribute("id"), direct: this.car.direction, pos: {x: 444, y: null}})
+                }else{ 
+                   insertAt(json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue, 0, {ident: car.getAttribute("id"), direct: this.car.direction, pos: {x: 444, y: null}})
+                }
+            }else{
+                json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.push({ident: car.getAttribute("id"), direct: this.car.direction, pos: {x: roadInfo.xBottom, y: null}})
             }
         }
+
         if (roadInfo.horizontal && roadInfo.direction == "right") {
             car.setAttribute("style", `position: absolute; left: ${0}px`)
             car.setAttribute("src", './car2.png')
             car.classList.add('carRight')
             this.direction = "right"
+            json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.push({ident: car.getAttribute("id"), direct: this.car.direction, pos: {x: 0, y: null}})
+
         }
 
         roadParent.appendChild(car)
-
+        var carElement = this.car;
         this.car = {
-            ident: json.geo.map.Sector_XY01.rt.carsLen - 1,
+            ident: carElement.getAttribute("id"),
             lifeTime: 0,
             direction: this.direction,
         }
-        this.ident = json.geo.map.Sector_XY01.rt.carsLen - 1;
+        this.ident = carElement.getAttribute("id");
         this.lifeTime = 0;
-
         if(isGariaJn){
             return this.MoveCar("max_2")
         }
@@ -163,19 +184,21 @@ class Car {
                     var car_ = json.geo.map.Sector_XY01.rt.cars.find(o => o.ident == this.car.ident);
                     let carElem = document.getElementById(car_.ident);
                     if (Math.abs(parseInt(carElem.style.top.replace("px", ""))) <= targetY) {
-                        this.DestroyCar()
                         this.path.shift()
                         if (this.path.length > 0) {
+                            this.DestroyCar(true)
                             this.rd_ident = this.path[this.path.length - 1];
                             clearInterval(this.lifeCycle)
                             return this.SpawnCar(null)
                         } else {
-                            clearInterval(this.lifeCycle)
+                            this.DestroyCar(false)
+                            return clearInterval(this.lifeCycle)
                         }
                     }
                     car_.lifeTime += 1;
                     if (car_.direction == "up" && this.state.isMoving) {
                         carElem.style.top = (parseInt(carElem.style.top.replace("px", "")) - 5).toString() + "px";
+                        json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.find(a => a.ident === this.car.ident).pos.y-=5;
                     }
                 }, 100)
                 break;
@@ -185,9 +208,9 @@ class Car {
                     var car_ = json.geo.map.Sector_XY01.rt.cars.find(o => o.ident == this.car.ident);
                     let carElem = document.getElementById(car_.ident);
                     if (Math.abs(parseInt(carElem.style.top.replace("px", ""))) <= targetY) {
-                        this.DestroyCar()
                         this.path.shift()
                         if (this.path.length > 0) {
+                            this.DestroyCar(true)
                             this.rd_ident = this.path[this.path.length - 1];
                             clearInterval(this.lifeCycle)
                             if(this.path[this.path.length - 1] == "max_2_jn"){
@@ -196,12 +219,15 @@ class Car {
                             }
                             return this.SpawnCar(null)
                         } else {
-                            clearInterval(this.lifeCycle)
+                            this.DestroyCar(false)
+                            return clearInterval(this.lifeCycle)
                         }
                     }
                     car_.lifeTime += 1;
                     if (car_.direction == "up" && this.state.isMoving) {
+
                         carElem.style.top = (parseInt(carElem.style.top.replace("px", "")) - 5).toString() + "px";
+                        json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.find(a => a.ident === this.car.ident).pos.y-=5;
                     }
                 }, 100)
                 break;
@@ -211,19 +237,23 @@ class Car {
                     var car_ = json.geo.map.Sector_XY01.rt.cars.find(o => o.ident == this.car.ident);
                     let carElem = document.getElementById(car_.ident);
                     if (Math.abs(parseInt(carElem.style.left.replace("px", ""))) <= targetX) {
-                        this.DestroyCar()
                         this.path.shift()
                         if (this.path.length > 0) {
+                            this.DestroyCar(true)
                             this.rd_ident = this.path[this.path.length - 1];
                             clearInterval(this.lifeCycle)
                             return this.SpawnCar(null)
                         } else {
-                            clearInterval(this.lifeCycle)
+                            this.DestroyCar(false)
+                            return clearInterval(this.lifeCycle)
                         }
                     }
                     car_.lifeTime += 1;
+                    
                     if (car_.direction == "left" && this.state.isMoving) {
                         carElem.style.left = (parseInt(carElem.style.left.replace("px", "")) - 5).toString() + "px";
+                        json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.find(a => a.ident === this.car.ident).pos.x-=5;
+
                     }
                 }, 100)
                 break;
@@ -233,20 +263,23 @@ class Car {
                     var car_ = json.geo.map.Sector_XY01.rt.cars.find(o => o.ident == this.car.ident);
                     let carElem = document.getElementById(car_.ident);
                     if (Math.abs(parseInt(carElem.style.left.replace("px", ""))) >= targetX) {
-                        this.DestroyCar()
                         this.path.shift()
                         if (this.path.length > 0) {
+                            this.DestroyCar(true)
                             this.rd_ident = this.path[this.path.length - 1];
                             clearInterval(this.lifeCycle)
                             return this.SpawnCar(null)
                         } else {
+                            this.DestroyCar(false)
                             clearInterval(this.lifeCycle)
                             return this.SpawnCar(null)
                         }
                     }
                     car_.lifeTime += 1;
                     if (car_.direction == "right" && this.state.isMoving) {
+
                         carElem.style.left = (parseInt(carElem.style.left.replace("px", "")) + 5).toString() + "px";
+                        json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.find(a => a.ident === this.car.ident).pos.x+=5;
                     }
                 }, 100)
                 break;
@@ -257,35 +290,36 @@ class Car {
                     let carElem = document.getElementById(car_.ident);
                     if (Math.abs(parseInt(carElem.style.left.replace("px", ""))) >= targetX) {
                         // setTimeout()
-                        this.DestroyCar()
+                        this.DestroyCar(false)
                         this.path.shift()
                         return clearInterval(this.lifeCycle)
                     }
                     car_.lifeTime += 1;
-                    if (car_.direction == "left" && this.state.isMoving) {
-                        carElem.style.left = (parseInt(carElem.style.left.replace("px", "")) - 5).toString() + "px";
-                    }
                     if (car_.direction == "right" && this.state.isMoving) {
+
                         carElem.style.left = (parseInt(carElem.style.left.replace("px", "")) + 5).toString() + "px";
+                        json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.find(a => a.ident === this.car.ident).pos.x+=5;
                     }
                 }, 100)
                 break;
             case "max_2":
-                var targetX = -25;
+                var targetX = 1;
                 this.lifeCycle = setInterval(() => {
                     var car_ = json.geo.map.Sector_XY01.rt.cars.find(o => o.ident == this.car.ident);
                     let carElem = document.getElementById(car_.ident);
                     if (Math.abs(parseInt(carElem.style.left.replace("px", ""))) <= targetX) {
-                        this.DestroyCar()
+                        this.DestroyCar(false)
                         this.path.shift()
                         return clearInterval(this.lifeCycle)
                     }
+                    if(Math.abs(parseInt(carElem.style.left.replace("px", ""))) <= 475 && Math.abs(parseInt(carElem.style.left.replace("px", ""))) >= 428){
+                        json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).carAtJn = this.car.ident;
+                    }
                     car_.lifeTime += 1;
                     if (car_.direction == "left" && this.state.isMoving) {
+
                         carElem.style.left = (parseInt(carElem.style.left.replace("px", "")) - 5).toString() + "px";
-                    }
-                    if (car_.direction == "right" && this.state.isMoving) {
-                        carElem.style.left = (parseInt(carElem.style.left.replace("px", "")) + 5).toString() + "px";
+                        json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.find(a => a.ident === this.car.ident).pos.x-=5;
                     }
                 }, 100)
                 break;
@@ -295,9 +329,19 @@ class Car {
 
     }
 
-    DestroyCar() {
+    DestroyCar(isLaneChanging) {
         try {
             document.getElementById(this.car.ident).remove()
+            if(!isLaneChanging){
+                json.geo.map.Sector_XY01.rt.cars.splice(json.geo.map.Sector_XY01.rt.cars.findIndex(a => a.ident === this.car.ident) , 1)
+            }
+            
+            var indexToRemove = json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.findIndex(car => car.ident === this.car.ident)
+            if(indexToRemove > -1){
+                json.geo.map.Sector_XY01.roads.find(rd => rd.ident == this.rd_ident).queue.splice(indexToRemove, 1)
+            }else{
+                console.error("Car couldnt remove from queue")
+            }
             console.log(`Removed car#${this.car.ident}`)
         } catch {
 
@@ -350,8 +394,17 @@ json.geo.map.Sector_XY01.junctions.forEach((jn) => {
 })
 
 setInterval(() => {
-    let roads = ["max_1", "max_2", "mini_2"]
+    let roads = ["max_2", "max_1", "mini_2"]
     let car = new Car(roads[Math.floor(Math.random() * roads.length)])
     json.geo.map.Sector_XY01.rt.cars.push(car)
 
 }, Math.floor((Math.random() * 3000) + 1500));
+
+
+setInterval(() => {
+    text = "";
+    json.geo.map.Sector_XY01.roads.find(rd => rd.ident == "max_2").queue.forEach((car) => {
+        text += `${car.ident}<br />`
+    })
+    document.getElementById("queue").innerHTML = text
+}, 10)
