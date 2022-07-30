@@ -75,6 +75,102 @@ const json = {
                     },
 
                 ],
+                pavements: [{
+                    xTop: 473,
+                    yTop: 454,
+                    xBottom: 483,
+                    yBottom: 538,
+                    ident: "pav_1",
+                    horizontal: false,
+                    direction: "up",
+                    lights: [
+                        {
+                            xTop: 484,
+                            yTop: 459,
+                            ident: "light_13",
+                            count: 0
+                        },
+                        {
+                            xTop: 484,
+                            yTop: 524,
+                            ident: "light_14",
+                            count: 0
+                        },
+                    ]
+                },
+                {
+                    xTop: 484,
+                    yTop: 492,
+                    xBottom: 714,
+                    yBottom: 502,
+                    ident: "pav_2",
+                    horizontal: true,
+                    direction: "left",
+                    lights: [{
+                        xTop: 706,
+                        yTop: 485,
+                        ident: "light_1",
+                        count: 0
+                    },
+                    {
+                        xTop: 706,
+                        yTop: 503,
+                        ident: "light_2",
+                        count: 0
+                    },
+                    {
+                        xTop: 662,
+                        yTop: 485,
+                        ident: "light_3",
+                        count: 0
+                    },
+                    {
+                        xTop: 663,
+                        yTop: 503,
+                        ident: "light_4",
+                        count: 0
+                    },
+                    {
+                        xTop: 616,
+                        yTop: 485,
+                        ident: "light_5",
+                        count: 0
+                    },
+                    {
+                        xTop: 616,
+                        yTop: 503,
+                        ident: "light_6",
+                        count: 0
+                    },
+                    {
+                        xTop: 572,
+                        yTop: 485,
+                        ident: "light_7",
+                        count: 0
+                    },
+                    {
+                        xTop: 572,
+                        yTop: 503,
+                        ident: "light_8",
+                        count: 0
+                    },
+                    {
+                        xTop: 532,
+                        yTop: 485,
+                        ident: "light_9",
+                        count: 0
+                    },
+                    {
+                        xTop: 532,
+                        yTop: 503,
+                        ident: "light_10",
+                        count: 0
+                    },
+                    
+                ]
+                }
+            ],
+            
                 streetLights: [
                     {
                         link: "max_1",
@@ -98,12 +194,217 @@ const json = {
                 rt: {
                     carsLen: 0,
                     cars: []
+                },
+                ct: {
+                    personsLen: 0,
+                    persons: []
                 }
             }
         }
     }
 }
 
+/*============================Stella===============================*/
+class Person {
+    constructor(pv_ident) {
+        this.pv_ident = pv_ident;
+
+        this.state = {
+            isMoving: false,
+        }
+        this.SpawnPerson(null)
+    }
+
+    SpawnPerson() {
+        const pavInfo = json.geo.map.Sector_XY01.pavements.find(pv => pv.ident == this.pv_ident);
+        console.log(this.pv_ident);
+        this.state.isMoving = true;
+        let person = document.createElement("img");
+        this.person = person;
+        person.setAttribute("id", `${json.geo.map.Sector_XY01.ct.personsLen}`)
+        json.geo.map.Sector_XY01.ct.personsLen++;
+        person.setAttribute("src", './car.png')
+        let pavementParent = document.getElementById(this.pv_ident);
+
+        this.person.setAttribute("width", "11px")
+        this.person.setAttribute("height", "11px")
+        this.direction = null;
+
+        if (!pavInfo.horizontal) {
+            person.setAttribute("style", `position: absolute; top: ${75}px`)
+            person.classList.add('personUp')
+            this.direction = "up";
+        } else {
+            person.setAttribute("style", `position: absolute; right: ${0}px`)
+            person.classList.add('personLeft')
+            this.direction = "left";
+        }
+
+        pavementParent.appendChild(person)
+
+
+
+        this.person = {
+            ident: json.geo.map.Sector_XY01.ct.personsLen - 1,
+            lifeTime: 0,
+            direction: this.direction,
+        }
+        this.ident = json.geo.map.Sector_XY01.ct.personsLen - 1;
+        this.lifeTime = 0;
+
+        this.movePerson(this.pv_ident);
+
+    }
+
+    movePerson(curr_pv) {
+        const pavInfo = json.geo.map.Sector_XY01.pavements.find(pv => pv.ident == curr_pv);
+        let dir = pavInfo.direction;
+        switch (dir) {
+
+            case "up":
+                var targetY = 1;
+                this.lifeCycle = setInterval(() => {
+                    var person_ = json.geo.map.Sector_XY01.ct.persons.find(o => o.ident == this.person.ident);
+                    let personElem = document.getElementById(person_.ident);
+                    
+                    // console.log(pavInfo.lights)
+                    pavInfo.lights.forEach((lt) => {
+                        console.log(lt.ident, Math.abs(lt.yTop - pavInfo.yTop - parseInt(personElem.style.top.replace("px", ""))));
+                        
+                        if(Math.abs(lt.yTop -pavInfo.yTop- parseInt(personElem.style.top.replace("px", ""))) <= 30)
+                        {
+                            
+                            lt.count = 100;
+                            console.log("yellow");
+                            
+                        }
+                        
+
+                })
+                    if (Math.abs(parseInt(personElem.style.top.replace("px", ""))) <= targetY) {
+                        this.DestroyPerson()
+                        clearInterval(this.lifeCycle);
+                    }
+                    person_.lifeTime += 1;
+                    if (person_.direction == "up" && this.state.isMoving) {
+                        personElem.style.top = (parseInt(personElem.style.top.replace("px", "")) - 5).toString() + "px";
+                    }
+                }, 250)
+                break;
+
+            case "left":
+                console.log(`move ${curr_pv}`);
+                var targetX = 215;
+                this.lifeCycle = setInterval(() => {
+                    
+                    var person_ = json.geo.map.Sector_XY01.ct.persons.find(o => o.ident == this.person.ident);
+                    let personElem = document.getElementById(person_.ident);
+                    const pavInfo = json.geo.map.Sector_XY01.pavements.find(pv => pv.ident == curr_pv);
+                    // console.log(pavInfo.lights)
+                    pavInfo.lights.forEach((lt) => {
+                        // console.log(Math.abs(lt.xTop - 715 + parseInt(personElem.style.right.replace("px", ""))));
+                        let lightElem = document.getElementById(lt.ident);
+                        if(Math.abs(lt.xTop - pavInfo.xBottom + parseInt(personElem.style.right.replace("px", ""))) <= 50)
+                        {
+                            
+                            lt.count = 100;
+                            console.log("yellow");
+                            
+                        }
+                        
+
+                })
+                    if (Math.abs(parseInt(personElem.style.right.replace("px", ""))) >= targetX) {
+                        this.DestroyPerson()
+                        clearInterval(this.lifeCycle);
+                    }
+                    person_.lifeTime += 1;
+                    if (person_.direction == "left" && this.state.isMoving) {
+                        personElem.style.right = (parseInt(personElem.style.right.replace("px", "")) + 5).toString() + "px";
+                    }
+                }, 250)
+                break;
+        }
+    }
+
+    DestroyPerson() {
+        try {
+            document.getElementById(this.person.ident).remove()
+            console.log(`Removed car#${this.person.ident}`)
+        } catch {
+
+        }
+    }
+
+}
+
+console.log(json.geo.map.Sector_XY01.pavements)
+
+json.geo.map.Sector_XY01.pavements.forEach((pv) => {
+    let pavBlock = document.createElement("div");
+    pavBlock.setAttribute("style", `position: absolute; width: ${Math.abs(pv.xTop - pv.xBottom)}px; 
+                            height: ${Math.abs(pv.yTop - pv.yBottom)}px; left: ${pv.xTop}px; top: ${pv.yTop}px;`);
+    pavBlock.setAttribute("class", "pavement")
+    pavBlock.setAttribute("id", `${pv.ident}`)
+    city.appendChild(pavBlock)
+    console.log(pv)
+    pv.lights.forEach((lt) => {
+        // console.log(lt.ident);
+        let lightBlock = document.createElement("div");
+        lightBlock.setAttribute("style", `position: absolute; width: 7px; 
+                                height: 7px; left: ${lt.xTop}px; top: ${lt.yTop}px; border-radius: 100%`);
+        lightBlock.setAttribute("class", "light")
+        lightBlock.setAttribute("id", `${lt.ident}`)
+        city.appendChild(lightBlock)
+        console.log("New light")
+    })
+})
+
+
+setInterval(() => {
+    let pavements = ["pav_1", "pav_2"]
+    let person = new Person(pavements[Math.floor(Math.random() * pavements.length)])
+    // console.log(pavements[Math.floor(Math.random() * pavements.length)])
+    json.geo.map.Sector_XY01.ct.persons.push(person)
+
+}, Math.floor((Math.random() * 1000) + 4000));
+
+
+
+
+    setInterval(() => {
+        json.geo.map.Sector_XY01.pavements.forEach((pv) => {
+            pv.lights.forEach((lt) => {
+                let lightElem = document.getElementById(lt.ident)
+                lt.count=Math.max(0, lt.count-10);
+                if(lt.count <= 0)
+                {
+                
+                    lightElem.style.backgroundColor = "grey";
+                }
+                else{
+                    lightElem.style.backgroundColor = "yellow";
+                }
+            })
+            
+        })
+    }, 50)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*===============================Ribu==================================*/
 class Car {
 
     constructor(rd_ident) {
@@ -742,3 +1043,11 @@ const ManageTraffic = () => {
 }
 
 ManageTraffic()
+
+
+
+
+
+
+
+

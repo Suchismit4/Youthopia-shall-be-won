@@ -34,6 +34,20 @@
 
 }
 
+.light {
+    z-index: 91 !important;
+    justify-content: center;
+    background-color: rgb(165, 165, 161);
+}
+
+.light:hover {
+    cursor: pointer;
+    z-index: 91 !important;
+    background-color: rgb(245, 245, 129);
+    box-shadow: 0 0 50px rgb(230, 248, 124);
+
+}
+
 @keyframes glow {
     0% {
         background-color: #49e8192a;
@@ -78,5 +92,13 @@
 }
 
 .carUp {
+    transition: .3s ease;
+}
+
+.personLeft{
+    transition: .3s ease;
+}
+
+.personUp{
     transition: .3s ease;
 }
